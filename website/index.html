@@ -188,6 +188,52 @@
   footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
   footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .demo { margin: 48px 0 0; position: relative; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1.05fr); align-items: center; overflow: hidden; }
+  .demo-wire { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .demo-wire path { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 5; }
+  .demo-app { border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font: 12px/1.5 "Geist Mono", ui-monospace, monospace; position: relative; z-index: 1; min-width: 0; }
+  .demo-app header { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .demo-app header i { width: 8px; height: 8px; border-radius: 999px; background: var(--line); }
+  .demo-app header span { margin-left: 6px; }
+  .demo-log { list-style: none; margin: 0; padding: 10px; display: grid; gap: 6px; min-height: 132px; align-content: start; }
+  .demo-log li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: baseline; }
+  .demo-log li span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .demo-tag { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; padding: 1px 6px; border-radius: 999px; color: #fff; }
+  .demo-bots { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; position: relative; z-index: 1; min-width: 0; }
+  .demo-bot { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: center; }
+  .demo-avatar { width: 52px; height: 52px; position: relative; }
+  .demo-avatar svg { width: 100%; height: 100%; overflow: visible; }
+  .demo-avatar .eyes { transform-origin: 32px 32px; transform-box: view-box; animation: blink 5s infinite; }
+  .demo-bot:nth-child(2) .eyes { animation-delay: 1.7s; }
+  .demo-bot:nth-child(3) .eyes { animation-delay: 3.1s; }
+  .demo-avatar .alert { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 999px; background: #FFB800; color: #0a0a0a; font: 700 12px/18px Geist, sans-serif; text-align: center; transform: scale(0); }
+  .demo-bubble { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 7px 10px; font-size: 13px; line-height: 1.35; min-height: 50px; display: grid; align-content: center; min-width: 0; }
+  .demo-bubble b { font-weight: 500; font-size: 11px; color: var(--muted); display: block; }
+  .demo-bubble span { overflow: hidden; text-overflow: ellipsis; }
+  .demo-bubble .idle { color: var(--muted); }
+  .demo-bubble .done::before { content: "\2713  "; color: #0b9a4f; font-weight: 600; }
+  .dots { display: inline-flex; gap: 3px; }
+  .dots i { width: 5px; height: 5px; border-radius: 999px; background: var(--muted); animation: dot 1s infinite; }
+  .dots i:nth-child(2) { animation-delay: .15s; }
+  .dots i:nth-child(3) { animation-delay: .3s; }
+  .demo-packet { position: absolute; left: 0; top: 0; z-index: 2; font: 500 11px/1 "Geist Mono", ui-monospace, monospace; color: #fff; padding: 5px 8px; border-radius: 999px; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,.18); opacity: 0; will-change: transform; }
+  .is-alert .demo-avatar svg { animation: hop .5s ease-out; }
+  .is-alert .alert { animation: pop 1.4s ease-out forwards; }
+  .is-working .eyes { animation: look 1.2s ease-in-out infinite alternate; }
+  @keyframes blink { 0%, 46%, 50%, 100% { transform: scaleY(1); } 48% { transform: scaleY(.1); } }
+  @keyframes dot { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-2px); } }
+  @keyframes hop { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(-7px) scale(1.06, .94); } 70% { transform: translateY(0) scale(.96, 1.04); } 100% { transform: none; } }
+  @keyframes pop { 0% { transform: scale(0); } 20% { transform: scale(1.2); } 30%, 80% { transform: scale(1); } 100% { transform: scale(0); } }
+  @keyframes look { from { transform: translateX(-2px); } to { transform: translateX(3px); } }
+  @media (max-width: 640px) {
+    .demo { grid-template-columns: minmax(0, 1fr); gap: 36px; padding: 14px; }
+    .demo-gap { display: none; }
+    .demo-log { min-height: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .demo-avatar .eyes, .dots i { animation: none; }
+  }
   @media (max-width: 640px) {
     nav ul { gap: 14px; }
     nav li.hide-sm { display: none; }
@@ -232,6 +278,31 @@
         </div>
         <a class="button" href="https://github.com/alfonsobries/laravel-grok-bot#readme">Read the docs</a>
       </div>
+
+    <figure class="demo" id="demo" aria-labelledby="demo-caption">
+      <figcaption id="demo-caption" class="sr-only">Animation: a Laravel app logs an exception, a support ticket and a failed payment. Each one travels as a notification to its own Grok Bot routine, and each Bot reacts and resolves it: it opens a pull request with the fix, refunds a duplicate charge, and emails the customer a new payment link.</figcaption>
+      <svg class="demo-wire" aria-hidden="true"><path id="demo-path"/></svg>
+      <div class="demo-app" aria-hidden="true">
+        <header><i></i><i></i><i></i><span>acme/shop</span></header>
+        <ol class="demo-log" id="demo-log"></ol>
+      </div>
+      <div class="demo-gap" aria-hidden="true"></div>
+      <ul class="demo-bots" aria-hidden="true">
+          <li class="demo-bot" data-bot="bugs" style="--bot:#FF2D20">
+            <div class="demo-avatar"><svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#FF2D20" d="M31 8C46 8 56 17.6 56 32.4 56 47.6 46.4 58 31.6 58 17 58 6 48.4 6 33.4 6 18.2 16.6 8 31 8Z"/><g class="eyes"><ellipse cx="24" cy="32" rx="4.4" ry="6.8" fill="#0A0A0A"/><ellipse cx="38.5" cy="32" rx="4.4" ry="6.8" fill="#0A0A0A"/><circle cx="25.8" cy="28.6" r="1.7" fill="#FFF"/><circle cx="40.3" cy="28.6" r="1.7" fill="#FFF"/></g></svg><span class="alert">!</span></div>
+            <div class="demo-bubble"><b>routine: bugs</b><span class="demo-text idle">Waiting for work</span></div>
+          </li>
+          <li class="demo-bot" data-bot="support" style="--bot:#7C5CFF">
+            <div class="demo-avatar"><svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#7C5CFF" d="M31 8C46 8 56 17.6 56 32.4 56 47.6 46.4 58 31.6 58 17 58 6 48.4 6 33.4 6 18.2 16.6 8 31 8Z"/><g class="eyes"><ellipse cx="24" cy="32" rx="4.4" ry="6.8" fill="#0A0A0A"/><ellipse cx="38.5" cy="32" rx="4.4" ry="6.8" fill="#0A0A0A"/><circle cx="25.8" cy="28.6" r="1.7" fill="#FFF"/><circle cx="40.3" cy="28.6" r="1.7" fill="#FFF"/></g></svg><span class="alert">!</span></div>
+            <div class="demo-bubble"><b>routine: support</b><span class="demo-text idle">Waiting for work</span></div>
+          </li>
+          <li class="demo-bot" data-bot="billing" style="--bot:#12B5A5">
+            <div class="demo-avatar"><svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#12B5A5" d="M31 8C46 8 56 17.6 56 32.4 56 47.6 46.4 58 31.6 58 17 58 6 48.4 6 33.4 6 18.2 16.6 8 31 8Z"/><g class="eyes"><ellipse cx="24" cy="32" rx="4.4" ry="6.8" fill="#0A0A0A"/><ellipse cx="38.5" cy="32" rx="4.4" ry="6.8" fill="#0A0A0A"/><circle cx="25.8" cy="28.6" r="1.7" fill="#FFF"/><circle cx="40.3" cy="28.6" r="1.7" fill="#FFF"/></g></svg><span class="alert">!</span></div>
+            <div class="demo-bubble"><b>routine: billing</b><span class="demo-text idle">Waiting for work</span></div>
+          </li>
+      </ul>
+      <div class="demo-packet" id="demo-packet" aria-hidden="true"></div>
+    </figure>
     </div>
   </div>
 
@@ -441,6 +512,143 @@ GrokBotMessage::create(<span class="s">'...'</span>)->routine(<span class="s">'b
       }, 1600);
     });
   });
+</script>
+
+<script>
+  (() => {
+    const demo = document.getElementById('demo');
+    if (!demo) {
+      return;
+    }
+
+    const log = document.getElementById('demo-log');
+    const packet = document.getElementById('demo-packet');
+    const wire = document.getElementById('demo-path');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const scenes = [
+      { bot: 'bugs', color: '#FF2D20', tag: 'error', line: 'ErrorException: Undefined array key "currency"', event: 'exception.reported', working: 'On it. Reproducing it in a test', done: 'Opened draft PR #128 with the fix' },
+      { bot: 'support', color: '#7C5CFF', tag: 'ticket', line: 'Ticket #4821: I was charged twice', event: 'ticket.opened', working: 'Checking the charges in Stripe', done: 'Refunded the duplicate and replied' },
+      { bot: 'billing', color: '#12B5A5', tag: 'payment', line: 'Payment failed for order #9921', event: 'payment.failed', working: 'Reading the decline reason', done: 'Emailed the customer a new link' },
+    ];
+    const bots = Object.fromEntries([...demo.querySelectorAll('[data-bot]')].map((el) => [el.dataset.bot, el]));
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    let running = false;
+    let visible = false;
+
+    const say = (bot, text, state) => {
+      const target = bot.querySelector('.demo-text');
+      target.className = 'demo-text' + (state === 'done' ? ' done' : '');
+      target.innerHTML = state === 'typing' ? '<span class="dots"><i></i><i></i><i></i></span>' : '';
+      if (state !== 'typing') {
+        target.textContent = text;
+      }
+    };
+
+    const addLine = (scene) => {
+      const item = document.createElement('li');
+      const tag = document.createElement('span');
+      const text = document.createElement('span');
+      tag.className = 'demo-tag';
+      tag.style.background = scene.color;
+      tag.textContent = scene.tag;
+      text.textContent = scene.line;
+      item.append(tag, text);
+      log.append(item);
+      while (log.children.length > 5) {
+        log.firstElementChild.remove();
+      }
+      item.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'ease-out' });
+    };
+
+    const geometry = (bot) => {
+      const box = demo.getBoundingClientRect();
+      const from = log.parentElement.getBoundingClientRect();
+      const to = bot.querySelector('.demo-avatar').getBoundingClientRect();
+      const stacked = to.top > from.bottom;
+      const start = stacked ? [from.left + from.width / 2 - box.left, from.bottom - box.top] : [from.right - box.left, from.top + from.height / 2 - box.top];
+      const end = stacked ? [to.left + to.width / 2 - box.left, to.top - box.top] : [to.left - box.left, to.top + to.height / 2 - box.top];
+      const c1 = stacked ? [start[0], (start[1] + end[1]) / 2] : [(start[0] + end[0]) / 2, start[1]];
+      const c2 = stacked ? [end[0], (start[1] + end[1]) / 2] : [(start[0] + end[0]) / 2, end[1]];
+      return { start, c1, c2, end, width: box.width, height: box.height };
+    };
+
+    const point = (g, t) => [0, 1].map((i) => {
+      const u = 1 - t;
+      return u * u * u * g.start[i] + 3 * u * u * t * g.c1[i] + 3 * u * t * t * g.c2[i] + t * t * t * g.end[i];
+    });
+
+    const travel = (scene) => new Promise((resolve) => {
+      const g = geometry(bots[scene.bot]);
+      wire.parentElement.setAttribute('viewBox', `0 0 ${g.width} ${g.height}`);
+      wire.setAttribute('d', `M${g.start} C${g.c1} ${g.c2} ${g.end}`);
+      packet.textContent = scene.event;
+      packet.style.background = scene.color;
+      const size = packet.getBoundingClientRect();
+      const duration = 1100;
+      const began = performance.now();
+      const frame = (now) => {
+        const t = Math.min(1, (now - began) / duration);
+        const eased = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const [x, y] = point(g, eased);
+        packet.style.opacity = t < .1 ? t * 10 : t > .9 ? (1 - t) * 10 : 1;
+        packet.style.transform = `translate(${x - size.width / 2}px, ${y - size.height / 2}px) scale(${1 - eased * .35})`;
+        if (t < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          resolve();
+        }
+      };
+      requestAnimationFrame(frame);
+    });
+
+    const play = async () => {
+      if (running) {
+        return;
+      }
+      running = true;
+      for (let i = 0; visible; i = (i + 1) % scenes.length) {
+        const scene = scenes[i];
+        const bot = bots[scene.bot];
+        addLine(scene);
+        await wait(500);
+        await travel(scene);
+        bot.classList.remove('is-alert');
+        void bot.offsetWidth;
+        bot.classList.add('is-alert');
+        say(bot, '', 'typing');
+        await wait(900);
+        bot.classList.add('is-working');
+        say(bot, scene.working + '...');
+        await wait(1600);
+        bot.classList.remove('is-working', 'is-alert');
+        say(bot, scene.done, 'done');
+        await wait(1400);
+      }
+      running = false;
+    };
+
+    if (reduced.matches) {
+      scenes.forEach((scene) => {
+        addLine(scene);
+        say(bots[scene.bot], scene.done, 'done');
+      });
+      return;
+    }
+
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting && !document.hidden;
+      if (visible) {
+        play();
+      }
+    }, { threshold: .2 }).observe(demo);
+
+    document.addEventListener('visibilitychange', () => {
+      visible = !document.hidden && demo.getBoundingClientRect().top < innerHeight;
+      if (visible) {
+        play();
+      }
+    });
+  })();
 </script>
 </body>
 </html>
