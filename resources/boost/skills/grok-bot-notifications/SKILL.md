@@ -65,7 +65,6 @@ class ScraperFailed extends Notification implements ShouldQueue
     public function toGrokBot(object $notifiable): GrokBotMessage
     {
         return GrokBotMessage::create("Scraper {$this->source} failed after {$this->attempts} attempts")
-            ->routine('scrapers')
             ->data([
                 'event' => 'scraper.failed',
                 'source' => $this->source,
