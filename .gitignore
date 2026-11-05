@@ -7,3 +7,7 @@ composer.lock
 coverage
 .DS_Store
 .env
+
+# aikit
+CLAUDE.local.md
+AGENTS.override.md
