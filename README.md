@@ -4,6 +4,8 @@
 [![Tests](https://img.shields.io/github/actions/workflow/status/alfonsobries/laravel-grok-bot/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/alfonsobries/laravel-grok-bot/actions/workflows/tests.yml)
 [![License](https://img.shields.io/packagist/l/alfonsobries/laravel-grok-bot.svg?style=flat-square)](LICENSE.md)
 
+**[laravel-grok-bot.vercel.app](https://laravel-grok-bot.vercel.app)**
+
 Send Laravel notifications to a [Grok Bot](https://cursor.com/help/grok-bot/routines) routine. Each notification starts a run of the routine with your JSON as its input, and the Bot does what the routine's instruction says: tell you, investigate, open an issue, ask before acting.
 
 ```php
@@ -32,7 +34,7 @@ public function toGrokBot(object $notifiable): GrokBotMessage
 composer require alfonsobries/laravel-grok-bot
 ```
 
-Requires PHP 8.2+ and Laravel 11, 12 or 13. The service provider registers itself.
+Requires PHP 8.2+ and Laravel 12 or 13. The service provider registers itself.
 
 ## Setting up a routine
 
