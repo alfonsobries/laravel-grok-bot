@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laravel Grok Bot</title>
+<meta name="description" content="Laravel notification channel for Grok Bot. Send any notification to a Grok Bot routine through its webhook trigger.">
+<meta property="og:title" content="Laravel Grok Bot">
+<meta property="og:description" content="Send Laravel notifications to a Grok Bot routine.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23000'/%3E%3Cpath d='M9 22 16 9l7 13z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #0a0a0a;
+    --muted: #5c5c5c;
+    --line: #ebebeb;
+    --surface: #fafafa;
+    --code-bg: #fafafa;
+    --accent: #0a0a0a;
+    --accent-fg: #ffffff;
+    --comment: #6b6b6b;
+    --string: #0b6b3a;
+    --keyword: #8a2be2;
+    --focus: #0070f3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0a0a;
+      --fg: #ededed;
+      --muted: #a1a1a1;
+      --line: #262626;
+      --surface: #111111;
+      --code-bg: #111111;
+      --accent: #ededed;
+      --accent-fg: #0a0a0a;
+      --comment: #8f8f8f;
+      --string: #5fd38d;
+      --keyword: #c4a1ff;
+      --focus: #3291ff;
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.6 Geist, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--line); }
+  a:hover { text-decoration-color: currentColor; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 16px; top: 16px; background: var(--bg); padding: 8px 12px; z-index: 10; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+  header.top { border-bottom: 1px solid var(--line); }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; text-decoration: none; }
+  .brand svg { width: 22px; height: 22px; }
+  nav ul { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; font-size: 14px; }
+  nav a { color: var(--muted); text-decoration: none; }
+  nav a:hover { color: var(--fg); }
+  .hero { padding: 88px 0 56px; }
+  .eyebrow { display: inline-block; font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; margin-bottom: 20px; }
+  h1 { font-size: clamp(36px, 7vw, 56px); line-height: 1.05; letter-spacing: -0.04em; font-weight: 600; margin: 0 0 20px; }
+  .lead { font-size: 19px; color: var(--muted); margin: 0 0 32px; max-width: 34em; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .button {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px;
+    border-radius: 8px; font-weight: 500; font-size: 15px; text-decoration: none; border: 1px solid var(--line);
+  }
+  .button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .button.primary:hover { opacity: .88; }
+  .button:not(.primary):hover { background: var(--surface); }
+  .install {
+    display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 6px 0 16px;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--code-bg);
+    font: 14px/1 "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace; max-width: 100%;
+  }
+  .install code { overflow-x: auto; white-space: nowrap; }
+  .install code::before { content: "$ "; color: var(--muted); }
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 24px; letter-spacing: -0.02em; font-weight: 600; margin: 0 0 8px; }
+  h2 + p { color: var(--muted); margin: 0 0 24px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+  .code { position: relative; margin: 0 0 16px; }
+  .code .label { font: 12px/1 "Geist Mono", ui-monospace, monospace; color: var(--muted); padding: 10px 16px; border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--surface); }
+  pre {
+    margin: 0; padding: 16px; overflow-x: auto; border: 1px solid var(--line); border-radius: 0 0 8px 8px;
+    background: var(--code-bg); font: 13.5px/1.65 "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace; tab-size: 4;
+  }
+  .code.solo pre { border-radius: 8px; }
+  .c { color: var(--comment); }
+  .s { color: var(--string); }
+  .k { color: var(--keyword); }
+  .copy {
+    display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex: none;
+    border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer;
+  }
+  .code .copy { position: absolute; top: 4px; right: 6px; }
+  .code.solo .copy { top: 8px; right: 8px; }
+  .copy:hover { background: var(--line); color: var(--fg); }
+  .copy svg { width: 16px; height: 16px; }
+  ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 0; display: grid; gap: 20px; }
+  ol.steps li { counter-increment: step; display: grid; grid-template-columns: 32px 1fr; gap: 12px; }
+  ol.steps li::before {
+    content: counter(step); width: 28px; height: 28px; border-radius: 999px; border: 1px solid var(--line);
+    display: grid; place-items: center; font-size: 13px; font-weight: 500; color: var(--muted);
+  }
+  ol.steps p { margin: 0; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .grid div { background: var(--bg); padding: 20px; }
+  .grid p { margin: 0; color: var(--muted); font-size: 15px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 500; color: var(--muted); }
+  td code, p code, li code { font: 13px "Geist Mono", ui-monospace, monospace; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; }
+  .table-wrap { overflow-x: auto; }
+  footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (max-width: 640px) {
+    nav ul { gap: 14px; }
+    nav li.hide-sm { display: none; }
+    .hero { padding: 56px 0 40px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .button, .copy, nav a { transition: background-color .15s, color .15s, opacity .15s; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Laravel Grok Bot home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M9 22 16 9l7 13z" fill="var(--bg)"/></svg>
+      <span>laravel-grok-bot</span>
+    </a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#usage">Usage</a></li>
+        <li class="hide-sm"><a href="#routing">Routing</a></li>
+        <li><a href="https://github.com/alfonsobries/laravel-grok-bot#readme">Docs</a></li>
+        <li><a href="https://github.com/alfonsobries/laravel-grok-bot">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="hero">
+      <span class="eyebrow">Laravel notification channel</span>
+      <h1>Notify your Grok Bot from Laravel.</h1>
+      <p class="lead">Send any notification to a Grok Bot routine. Each one starts a run with your JSON as its input, and the Bot does what its instruction says.</p>
+      <div class="actions">
+        <div class="install">
+          <code id="install-cmd">composer require alfonsobries/laravel-grok-bot</code>
+          <button class="copy" type="button" data-copy="install-cmd" aria-label="Copy install command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+        </div>
+        <a class="button" href="https://github.com/alfonsobries/laravel-grok-bot#readme">Read the docs</a>
+      </div>
+    </div>
+  </div>
+
+  <section id="usage" aria-labelledby="usage-title">
+    <div class="wrap">
+      <h2 id="usage-title">Usage</h2>
+      <p>Return <code>grok-bot</code> from <code>via()</code> and build the message in <code>toGrokBot()</code>.</p>
+
+      <div class="code">
+        <div class="label">app/Notifications/ScraperFailed.php</div>
+        <button class="copy" type="button" data-copy="code-notification" aria-label="Copy notification example"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+<pre><code id="code-notification"><span class="k">use</span> NotificationChannels\GrokBot\GrokBotMessage;
+
+<span class="k">class</span> ScraperFailed <span class="k">extends</span> Notification <span class="k">implements</span> ShouldQueue
+{
+    <span class="k">use</span> Queueable;
+
+    <span class="k">public function</span> via(object $notifiable): array
+    {
+        <span class="k">return</span> [<span class="s">'grok-bot'</span>];
+    }
+
+    <span class="k">public function</span> toGrokBot(object $notifiable): GrokBotMessage
+    {
+        <span class="k">return</span> GrokBotMessage::create(<span class="s">"Scraper {$this->source} failed"</span>)
+            ->data([
+                <span class="s">'event'</span> => <span class="s">'scraper.failed'</span>,
+                <span class="s">'source'</span> => $this->source,
+                <span class="s">'error'</span> => $this->error,
+            ]);
+    }
+}</code></pre>
+      </div>
+
+      <div class="code">
+        <div class="label">What the routine receives</div>
+<pre><code>{
+    <span class="s">"message"</span>: <span class="s">"Scraper marcate failed"</span>,
+    <span class="s">"event"</span>: <span class="s">"scraper.failed"</span>,
+    <span class="s">"source"</span>: <span class="s">"marcate"</span>,
+    <span class="s">"error"</span>: <span class="s">"HTTP 403"</span>
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="setup" aria-labelledby="setup-title">
+    <div class="wrap">
+      <h2 id="setup-title">Set up a routine</h2>
+      <p>Four steps, once per routine.</p>
+      <ol class="steps">
+        <li><div><h3>Add a webhook trigger</h3><p>Ask your Bot to add a webhook trigger to a routine, and write the instruction: what the JSON means and what to do with it.</p></div></li>
+        <li><div><h3>Copy the URL and key</h3><p>Open the routine on desktop. The Webhook section has the <strong>POST to</strong> URL and the key.</p></div></li>
+        <li><div><h3>Add them to <code>.env</code></h3><p><code>GROK_BOT_WEBHOOK_URL</code> and <code>GROK_BOT_WEBHOOK_KEY</code>. More routines go in <code>config/grok-bot.php</code>.</p></div></li>
+        <li><div><h3>Ping it</h3><p><code>php artisan grok-bot:ping</code> confirms the routine starts a run.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="routing" aria-labelledby="routing-title">
+    <div class="wrap">
+      <h2 id="routing-title">Routing</h2>
+      <p>One routine per purpose. The message wins, then the notifiable, then the default.</p>
+      <div class="code solo">
+        <button class="copy" type="button" data-copy="code-routing" aria-label="Copy routing example"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+<pre><code id="code-routing"><span class="c">// On demand</span>
+Notification::route(<span class="s">'grok-bot'</span>, <span class="s">'fraud'</span>)->notify(<span class="k">new</span> SuspiciousOrder($order));
+
+<span class="c">// From the message</span>
+GrokBotMessage::create(<span class="s">'...'</span>)->routine(<span class="s">'fraud'</span>);
+
+<span class="c">// From a model, with a routine stored per team</span>
+<span class="k">public function</span> routeNotificationForGrokBot(): GrokBotRoutine
+{
+    <span class="k">return</span> GrokBotRoutine::make($this->grok_bot_url, $this->grok_bot_key);
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="details-title">
+    <div class="wrap">
+      <h2 id="details-title">Built for production</h2>
+      <p>What happens around the request.</p>
+      <div class="grid">
+        <div><h3>Clear failures</h3><p>An invalid key, a paused routine or a rate limit throws an exception that says which, and fires <code>NotificationFailed</code>.</p></div>
+        <div><h3>Retries that make sense</h3><p>Connection errors and 5xx are retried. A refused key is not.</p></div>
+        <div><h3>Keys stay secret</h3><p>The key never shows in an exception, an event or the command output.</p></div>
+        <div><h3>Agent ready</h3><p>Ships a Laravel Boost guideline and skill, so your agent can wire new notifications end to end.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="errors-title">
+    <div class="wrap">
+      <h2 id="errors-title">When a routine refuses</h2>
+      <p>A 200 means a run started. Anything else throws <code>CouldNotSendNotification</code>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Status</th><th scope="col">Cause</th></tr></thead>
+          <tbody>
+            <tr><td><code>401</code></td><td>The key is invalid or was regenerated</td></tr>
+            <tr><td><code>400</code></td><td>The routine is not active, or hit its run rate limit</td></tr>
+            <tr><td><code>404</code></td><td>The webhook URL no longer exists</td></tr>
+            <tr><td><code>5xx</code></td><td>Retried, then thrown</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>MIT License. By <a href="https://github.com/alfonsobries">Alfonso Bribiesca</a>.</span>
+    <span>Not affiliated with xAI or Cursor.</span>
+  </div>
+</footer>
+
+<p class="sr-only" role="status" aria-live="polite" id="copy-status"></p>
+
+<script>
+  const status = document.getElementById('copy-status');
+  const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
+
+  document.querySelectorAll('[data-copy]').forEach((button) => {
+    const icon = button.innerHTML;
+
+    button.addEventListener('click', async () => {
+      const text = document.getElementById(button.dataset.copy).textContent;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        button.innerHTML = check;
+        status.textContent = 'Copied to clipboard';
+      } catch {
+        status.textContent = 'Copy failed. Select the text and copy it manually.';
+      }
+
+      setTimeout(() => {
+        button.innerHTML = icon;
+        status.textContent = '';
+      }, 1600);
+    });
+  });
+</script>
+</body>
+</html>
