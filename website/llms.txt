@@ -1,0 +1,13 @@
+# laravel-grok-bot
+
+> Laravel notification channel for Grok Bot. Each notification starts a run of a Grok Bot routine through its webhook trigger, with the notification's JSON as input; the routine's instruction decides what the Bot does.
+
+- Install: `composer require alfonsobries/laravel-grok-bot` (PHP 8.2+, Laravel 12 or 13)
+- Configure: `GROK_BOT_WEBHOOK_URL` and `GROK_BOT_WEBHOOK_KEY` in `.env`; more routines in `config/grok-bot.php`
+- Use: return `'grok-bot'` from `via()` and a `NotificationChannels\GrokBot\GrokBotMessage` from `toGrokBot()`
+- Check: `php artisan grok-bot:ping {routine}`
+
+## Docs
+
+- [README](https://github.com/alfonsobries/laravel-grok-bot/blob/main/README.md): installation, routing, message methods, errors, testing
+- [Boost skill](https://github.com/alfonsobries/laravel-grok-bot/blob/main/resources/boost/skills/grok-bot-notifications/SKILL.md): wiring a notification to a routine end to end

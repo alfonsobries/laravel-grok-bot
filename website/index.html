@@ -3,17 +3,73 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Laravel Grok Bot</title>
-<meta name="description" content="Laravel notification channel for Grok Bot. Send any notification to a Grok Bot routine through its webhook trigger.">
-<meta property="og:title" content="Laravel Grok Bot">
-<meta property="og:description" content="Send Laravel notifications to a Grok Bot routine.">
+<title>Laravel Grok Bot Notification Channel</title>
+<meta name="description" content="Send Laravel notifications to a Grok Bot routine. An open source notification channel: each notification starts a Bot run with your JSON, and the Bot resolves it.">
+<link rel="canonical" href="https://laravel-grok-bot.vercel.app/">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://laravel-grok-bot.vercel.app/">
+<meta property="og:site_name" content="laravel-grok-bot">
+<meta property="og:title" content="Laravel Grok Bot Notification Channel">
+<meta property="og:description" content="Send Laravel notifications to a Grok Bot routine, and let the Bot resolve them.">
+<meta property="og:image" content="https://laravel-grok-bot.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="laravel-grok-bot: the Grok Bot notification channel for Laravel">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Laravel Grok Bot Notification Channel">
+<meta name="twitter:description" content="Send Laravel notifications to a Grok Bot routine, and let the Bot resolve them.">
+<meta name="twitter:image" content="https://laravel-grok-bot.vercel.app/og.png">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23000'/%3E%3Cpath d='M9 22 16 9l7 13z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "laravel-grok-bot",
+      "alternateName": "Laravel Grok Bot Notification Channel",
+      "description": "Laravel notification channel that sends notifications to a Grok Bot routine through its webhook trigger.",
+      "url": "https://laravel-grok-bot.vercel.app/",
+      "codeRepository": "https://github.com/alfonsobries/laravel-grok-bot",
+      "programmingLanguage": "PHP",
+      "runtimePlatform": "Laravel",
+      "license": "https://opensource.org/licenses/MIT",
+      "author": { "@type": "Person", "name": "Alfonso Bribiesca", "url": "https://github.com/alfonsobries" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I send a Laravel notification to Grok Bot?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Install alfonsobries/laravel-grok-bot, add the routine's webhook URL and key to .env, return 'grok-bot' from via() and build a GrokBotMessage in toGrokBot()." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does the Grok Bot routine receive?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A JSON body with the notification text in message and your data next to it. The routine's instruction decides what the Bot does with it." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does a successful notification mean the Bot finished?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. A 200 means the routine started a run. The result shows in the Bot's chat." }
+        },
+        {
+          "@type": "Question",
+          "name": "How many notifications can a Grok Bot routine take?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A routine runs at most 200 times an hour, and 300 across all routines. Batch or debounce events that come in bursts." }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
   :root {
     --bg: #ffffff;
@@ -63,7 +119,7 @@
   header.top { border-bottom: 1px solid var(--line); }
   header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; text-decoration: none; }
-  .brand svg { width: 22px; height: 22px; }
+  .brand img { display: block; }
   nav ul { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; font-size: 14px; }
   nav a { color: var(--muted); text-decoration: none; }
   nav a:hover { color: var(--fg); }
@@ -118,10 +174,16 @@
   .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
   .grid div { background: var(--bg); padding: 20px; }
   .grid p { margin: 0; color: var(--muted); font-size: 15px; }
+  .prose { white-space: pre-wrap; }
+  .ideas-title { margin: 32px 0 12px; }
+  dl.faq { margin: 0; }
+  dl.faq dt { font-weight: 600; margin-top: 20px; }
+  dl.faq dt:first-child { margin-top: 0; }
+  dl.faq dd { margin: 4px 0 0; color: var(--muted); }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { font-weight: 500; color: var(--muted); }
-  td code, p code, li code { font: 13px "Geist Mono", ui-monospace, monospace; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; }
+  td code, p code, li code, dd code { font: 13px "Geist Mono", ui-monospace, monospace; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; }
   .table-wrap { overflow-x: auto; }
   footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
   footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
@@ -143,13 +205,13 @@
 <header class="top">
   <div class="wrap">
     <a class="brand" href="/" aria-label="Laravel Grok Bot home">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M9 22 16 9l7 13z" fill="var(--bg)"/></svg>
+      <img src="/icon.svg" width="28" height="28" alt="">
       <span>laravel-grok-bot</span>
     </a>
     <nav aria-label="Main">
       <ul>
         <li><a href="#usage">Usage</a></li>
-        <li class="hide-sm"><a href="#routing">Routing</a></li>
+        <li class="hide-sm"><a href="#faq">FAQ</a></li>
         <li><a href="https://github.com/alfonsobries/laravel-grok-bot#readme">Docs</a></li>
         <li><a href="https://github.com/alfonsobries/laravel-grok-bot">GitHub</a></li>
       </ul>
@@ -160,9 +222,9 @@
 <main id="main">
   <div class="wrap">
     <div class="hero">
-      <span class="eyebrow">Laravel notification channel</span>
-      <h1>Notify your Grok Bot from Laravel.</h1>
-      <p class="lead">Send any notification to a Grok Bot routine. Each one starts a run with your JSON as its input, and the Bot does what its instruction says.</p>
+      <span class="eyebrow">Open source Laravel notification channel</span>
+      <h1>Laravel notifications, resolved by your Grok Bot.</h1>
+      <p class="lead">The Grok Bot notification channel for Laravel. Each notification starts a run of a Grok Bot routine with your JSON, and the Bot works it out: fixes the bug, answers the ticket, investigates, or asks you first.</p>
       <div class="actions">
         <div class="install">
           <code id="install-cmd">composer require alfonsobries/laravel-grok-bot</code>
@@ -175,53 +237,118 @@
 
   <section id="usage" aria-labelledby="usage-title">
     <div class="wrap">
-      <h2 id="usage-title">Usage</h2>
-      <p>Return <code>grok-bot</code> from <code>via()</code> and build the message in <code>toGrokBot()</code>.</p>
+      <h2 id="usage-title">How do I send a Laravel notification to Grok Bot?</h2>
+      <p>Return <code>grok-bot</code> from <code>via()</code> and build the message in <code>toGrokBot()</code>. This one hands every production exception to a Bot that fixes it.</p>
 
       <div class="code">
-        <div class="label">app/Notifications/ScraperFailed.php</div>
+        <div class="label">app/Notifications/ExceptionReported.php</div>
         <button class="copy" type="button" data-copy="code-notification" aria-label="Copy notification example"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
-<pre><code id="code-notification"><span class="k">use</span> NotificationChannels\GrokBot\GrokBotMessage;
+<pre><code id="code-notification"><span class="k">use</span> Illuminate\Bus\Queueable;
+<span class="k">use</span> Illuminate\Contracts\Queue\ShouldQueue;
+<span class="k">use</span> Illuminate\Notifications\Notification;
+<span class="k">use</span> NotificationChannels\GrokBot\GrokBotMessage;
+<span class="k">use</span> Throwable;
 
-<span class="k">class</span> ScraperFailed <span class="k">extends</span> Notification <span class="k">implements</span> ShouldQueue
+<span class="k">class</span> ExceptionReported <span class="k">extends</span> Notification <span class="k">implements</span> ShouldQueue
 {
     <span class="k">use</span> Queueable;
 
-    <span class="k">public function</span> via(object $notifiable): array
+    <span class="k">public</span> <span class="k">function</span> __construct(
+        <span class="k">public</span> string $<span class="k">class</span>,
+        <span class="k">public</span> string $message,
+        <span class="k">public</span> string $location,
+        <span class="k">public</span> string $trace,
+        <span class="k">public</span> ?string $url,
+    ) {}
+
+    <span class="k">public</span> <span class="k">static</span> <span class="k">function</span> from(Throwable $e): self
+    {
+        <span class="k">return</span> <span class="k">new</span> self(
+            $e::<span class="k">class</span>,
+            $e-&gt;getMessage(),
+            $e-&gt;getFile().<span class="s">':'</span>.$e-&gt;getLine(),
+            mb_substr($e-&gt;getTraceAsString(), 0, 4000),
+            app()-&gt;runningInConsole() ? null : request()-&gt;fullUrl(),
+        );
+    }
+
+    <span class="k">public</span> <span class="k">function</span> via(object $notifiable): array
     {
         <span class="k">return</span> [<span class="s">'grok-bot'</span>];
     }
 
-    <span class="k">public function</span> toGrokBot(object $notifiable): GrokBotMessage
+    <span class="k">public</span> <span class="k">function</span> toGrokBot(object $notifiable): GrokBotMessage
     {
-        <span class="k">return</span> GrokBotMessage::create(<span class="s">"Scraper {$this->source} failed"</span>)
-            ->data([
-                <span class="s">'event'</span> => <span class="s">'scraper.failed'</span>,
-                <span class="s">'source'</span> => $this->source,
-                <span class="s">'error'</span> => $this->error,
+        <span class="k">return</span> GrokBotMessage::create(<span class="s">"{$this-&gt;class}: {$this-&gt;message}"</span>)
+            -&gt;data([
+                <span class="s">'event'</span> =&gt; <span class="s">'exception.reported'</span>,
+                <span class="s">'repository'</span> =&gt; <span class="s">'acme/shop'</span>,
+                <span class="s">'commit'</span> =&gt; config(<span class="s">'app.commit'</span>),
+                <span class="s">'location'</span> =&gt; $this-&gt;location,
+                <span class="s">'url'</span> =&gt; $this-&gt;url,
+                <span class="s">'trace'</span> =&gt; $this-&gt;trace,
             ]);
     }
 }</code></pre>
       </div>
 
       <div class="code">
-        <div class="label">What the routine receives</div>
+        <div class="label">bootstrap/app.php</div>
+        <button class="copy" type="button" data-copy="code-report" aria-label="Copy exception handler example"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+<pre><code id="code-report"><span class="k">use</span> NotificationChannels\GrokBot\Exceptions\CouldNotSendNotification;
+
+-&gt;withExceptions(<span class="k">function</span> (Exceptions $exceptions): void {
+    $exceptions-&gt;dontReportDuplicates();
+
+    $exceptions-&gt;report(<span class="k">function</span> (Throwable $e): void {
+        <span class="k">if</span> (app()-&gt;isProduction() &amp;&amp; ! $e instanceof CouldNotSendNotification) {
+            Notification::route(<span class="s">'grok-bot'</span>, <span class="s">'bugs'</span>)-&gt;notify(ExceptionReported::from($e));
+        }
+    });
+})</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="resolve" aria-labelledby="resolve-title">
+    <div class="wrap">
+      <h2 id="resolve-title">What does the Grok Bot routine receive?</h2>
+      <p>A JSON body, next to the routine's instruction. The app sends the facts; the instruction says how to resolve them.</p>
+
+      <div class="code">
+        <div class="label">POST to the routine's webhook</div>
 <pre><code>{
-    <span class="s">"message"</span>: <span class="s">"Scraper marcate failed"</span>,
-    <span class="s">"event"</span>: <span class="s">"scraper.failed"</span>,
-    <span class="s">"source"</span>: <span class="s">"marcate"</span>,
-    <span class="s">"error"</span>: <span class="s">"HTTP 403"</span>
+    <span class="s">"message"</span>: <span class="s">"ErrorException: Undefined array key \"currency\""</span>,
+    <span class="s">"event"</span>: <span class="s">"exception.reported"</span>,
+    <span class="s">"repository"</span>: <span class="s">"acme/shop"</span>,
+    <span class="s">"commit"</span>: <span class="s">"4f5177f"</span>,
+    <span class="s">"location"</span>: <span class="s">"/app/Services/CheckoutService.php:88"</span>,
+    <span class="s">"url"</span>: <span class="s">"https://shop.example.com/checkout"</span>,
+    <span class="s">"trace"</span>: <span class="s">"#0 /app/Http/Controllers/CheckoutController.php(41): ..."</span>
 }</code></pre>
       </div>
+
+      <div class="code">
+        <div class="label">Routine instruction, written in Grok Bot</div>
+<pre><code class="prose">An exception from production arrives as JSON. Find the cause in the
+GitHub repo named in "repository" at "commit". If it is a bug in our code,
+write a failing test, fix it, and open a draft pull request; send me the
+link here. If it is not (a third-party outage, a bad deploy, a bot hitting
+a bad URL), tell me in one line and do nothing else.
+Ignore bodies with "type": "ping".</code></pre>
+      </div>
+
+      <h3 class="ideas-title">More things a Bot can resolve</h3>
+      <div class="grid"><div><h3>A production exception</h3><p>Opens a draft pull request with a test and the fix.</p></div><div><h3>A support ticket</h3><p>Looks the customer up, answers from your help center, asks before refunds.</p></div><div><h3>A failed payment</h3><p>Checks the processor, retries or emails the customer with the right link.</p></div><div><h3>A queue job that keeps failing</h3><p>Reads the payload and the error, and tells you what to change.</p></div></div>
     </div>
   </section>
 
   <section id="setup" aria-labelledby="setup-title">
     <div class="wrap">
-      <h2 id="setup-title">Set up a routine</h2>
+      <h2 id="setup-title">How do I connect a Grok Bot routine?</h2>
       <p>Four steps, once per routine.</p>
       <ol class="steps">
-        <li><div><h3>Add a webhook trigger</h3><p>Ask your Bot to add a webhook trigger to a routine, and write the instruction: what the JSON means and what to do with it.</p></div></li>
+        <li><div><h3>Add a webhook trigger</h3><p>Ask your Bot to add a webhook trigger to a routine, write its instruction, and make sure it is active.</p></div></li>
         <li><div><h3>Copy the URL and key</h3><p>Open the routine on desktop. The Webhook section has the <strong>POST to</strong> URL and the key.</p></div></li>
         <li><div><h3>Add them to <code>.env</code></h3><p><code>GROK_BOT_WEBHOOK_URL</code> and <code>GROK_BOT_WEBHOOK_KEY</code>. More routines go in <code>config/grok-bot.php</code>.</p></div></li>
         <li><div><h3>Ping it</h3><p><code>php artisan grok-bot:ping</code> confirms the routine starts a run.</p></div></li>
@@ -231,15 +358,15 @@
 
   <section id="routing" aria-labelledby="routing-title">
     <div class="wrap">
-      <h2 id="routing-title">Routing</h2>
-      <p>One routine per purpose. The message wins, then the notifiable, then the default.</p>
+      <h2 id="routing-title">Can I use one routine per purpose?</h2>
+      <p>Yes. The message wins, then the notifiable, then the default routine.</p>
       <div class="code solo">
         <button class="copy" type="button" data-copy="code-routing" aria-label="Copy routing example"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
 <pre><code id="code-routing"><span class="c">// On demand</span>
-Notification::route(<span class="s">'grok-bot'</span>, <span class="s">'fraud'</span>)->notify(<span class="k">new</span> SuspiciousOrder($order));
+Notification::route(<span class="s">'grok-bot'</span>, <span class="s">'bugs'</span>)->notify(ExceptionReported::from($e));
 
 <span class="c">// From the message</span>
-GrokBotMessage::create(<span class="s">'...'</span>)->routine(<span class="s">'fraud'</span>);
+GrokBotMessage::create(<span class="s">'...'</span>)->routine(<span class="s">'bugs'</span>);
 
 <span class="c">// From a model, with a routine stored per team</span>
 <span class="k">public function</span> routeNotificationForGrokBot(): GrokBotRoutine
@@ -258,26 +385,25 @@ GrokBotMessage::create(<span class="s">'...'</span>)->routine(<span class="s">'f
         <div><h3>Clear failures</h3><p>An invalid key, a paused routine or a rate limit throws an exception that says which, and fires <code>NotificationFailed</code>.</p></div>
         <div><h3>Retries that make sense</h3><p>Connection errors and 5xx are retried. A refused key is not.</p></div>
         <div><h3>Keys stay secret</h3><p>The key never shows in an exception, an event or the command output.</p></div>
-        <div><h3>Agent ready</h3><p>Ships a Laravel Boost guideline and skill, so your agent can wire new notifications end to end.</p></div>
+        <div><h3>Agent ready</h3><p>Ships a Laravel Boost guideline and skill, so your coding agent can wire new notifications end to end.</p></div>
       </div>
     </div>
   </section>
 
-  <section aria-labelledby="errors-title">
+  <section id="faq" aria-labelledby="faq-title">
     <div class="wrap">
-      <h2 id="errors-title">When a routine refuses</h2>
-      <p>A 200 means a run started. Anything else throws <code>CouldNotSendNotification</code>.</p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th scope="col">Status</th><th scope="col">Cause</th></tr></thead>
-          <tbody>
-            <tr><td><code>401</code></td><td>The key is invalid or was regenerated</td></tr>
-            <tr><td><code>400</code></td><td>The routine is not active, or hit its run rate limit</td></tr>
-            <tr><td><code>404</code></td><td>The webhook URL no longer exists</td></tr>
-            <tr><td><code>5xx</code></td><td>Retried, then thrown</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <h2 id="faq-title">Questions</h2>
+      <p>About runs, limits and failures.</p>
+      <dl class="faq">
+        <dt>Does a successful notification mean the Bot finished?</dt>
+        <dd>No. A 200 means the routine started a run. The result shows in the Bot's chat.</dd>
+        <dt>How many notifications can a Grok Bot routine take?</dt>
+        <dd>A routine runs at most 200 times an hour, and 300 across all routines. Batch or debounce events that come in bursts.</dd>
+        <dt>What happens when the routine refuses?</dt>
+        <dd>The channel throws <code>CouldNotSendNotification</code> with the cause: <code>401</code> invalid or regenerated key, <code>400</code> routine not active or over its rate limit, <code>404</code> webhook gone. Connection errors and <code>5xx</code> are retried first.</dd>
+        <dt>Which Laravel versions are supported?</dt>
+        <dd>Laravel 12 and 13 on PHP 8.2 and newer.</dd>
+      </dl>
     </div>
   </section>
 </main>

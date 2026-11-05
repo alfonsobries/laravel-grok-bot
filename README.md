@@ -6,13 +6,13 @@
 
 **[laravel-grok-bot.vercel.app](https://laravel-grok-bot.vercel.app)**
 
-Send Laravel notifications to a [Grok Bot](https://cursor.com/help/grok-bot/routines) routine. Each notification starts a run of the routine with your JSON as its input, and the Bot does what the routine's instruction says: tell you, investigate, open an issue, ask before acting.
+The Grok Bot notification channel for Laravel. Each notification starts a run of a [Grok Bot](https://cursor.com/help/grok-bot/routines) routine with your JSON as its input, and the Bot resolves it the way the routine's instruction says: fixes the bug, answers the ticket, investigates, or asks you first.
 
 ```php
 public function toGrokBot(object $notifiable): GrokBotMessage
 {
-    return GrokBotMessage::create('Scraper marcate failed after 3 attempts')
-        ->data(['source' => 'marcate', 'error' => 'HTTP 403']);
+    return GrokBotMessage::create("{$this->class}: {$this->message}")
+        ->data(['repository' => 'acme/shop', 'location' => $this->location, 'trace' => $this->trace]);
 }
 ```
 
@@ -71,9 +71,9 @@ php artisan vendor:publish --tag=grok-bot-config
         'url' => env('GROK_BOT_WEBHOOK_URL'),
         'key' => env('GROK_BOT_WEBHOOK_KEY'),
     ],
-    'fraud' => [
-        'url' => env('GROK_BOT_FRAUD_WEBHOOK_URL'),
-        'key' => env('GROK_BOT_FRAUD_WEBHOOK_KEY'),
+    'bugs' => [
+        'url' => env('GROK_BOT_BUGS_WEBHOOK_URL'),
+        'key' => env('GROK_BOT_BUGS_WEBHOOK_KEY'),
     ],
 ],
 ```
@@ -89,23 +89,37 @@ The key works with or without its `Bearer ` prefix.
 
 ## Usage
 
-Return `grok-bot` from `via()` and build the message in `toGrokBot()`:
+Return `grok-bot` from `via()` and build the message in `toGrokBot()`. This one hands every production exception to a Bot that fixes it:
 
 ```php
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\GrokBot\GrokBotMessage;
+use Throwable;
 
-class ScraperFailed extends Notification implements ShouldQueue
+class ExceptionReported extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public function __construct(
-        public string $source,
-        public int $attempts,
-        public string $error,
+        public string $class,
+        public string $message,
+        public string $location,
+        public string $trace,
+        public ?string $url,
     ) {}
+
+    public static function from(Throwable $e): self
+    {
+        return new self(
+            $e::class,
+            $e->getMessage(),
+            $e->getFile().':'.$e->getLine(),
+            mb_substr($e->getTraceAsString(), 0, 4000),
+            app()->runningInConsole() ? null : request()->fullUrl(),
+        );
+    }
 
     public function via(object $notifiable): array
     {
@@ -114,28 +128,67 @@ class ScraperFailed extends Notification implements ShouldQueue
 
     public function toGrokBot(object $notifiable): GrokBotMessage
     {
-        return GrokBotMessage::create("Scraper {$this->source} failed after {$this->attempts} attempts")
+        return GrokBotMessage::create("{$this->class}: {$this->message}")
             ->data([
-                'event' => 'scraper.failed',
-                'source' => $this->source,
-                'attempts' => $this->attempts,
-                'error' => $this->error,
+                'event' => 'exception.reported',
+                'repository' => 'acme/shop',
+                'commit' => config('app.commit'),
+                'location' => $this->location,
+                'url' => $this->url,
+                'trace' => $this->trace,
             ]);
     }
 }
+```
+
+Report each exception from the handler. Skip the channel's own failures, so a routine that is down does not report itself in a loop:
+
+```php
+// bootstrap/app.php
+use NotificationChannels\GrokBot\Exceptions\CouldNotSendNotification;
+
+->withExceptions(function (Exceptions $exceptions): void {
+    $exceptions->dontReportDuplicates();
+
+    $exceptions->report(function (Throwable $e): void {
+        if (app()->isProduction() && ! $e instanceof CouldNotSendNotification) {
+            Notification::route('grok-bot', 'bugs')->notify(ExceptionReported::from($e));
+        }
+    });
+})
 ```
 
 The routine receives:
 
 ```json
 {
-    "message": "Scraper marcate failed after 3 attempts",
-    "event": "scraper.failed",
-    "source": "marcate",
-    "attempts": 3,
-    "error": "HTTP 403"
+    "message": "ErrorException: Undefined array key \"currency\"",
+    "event": "exception.reported",
+    "repository": "acme/shop",
+    "commit": "4f5177f",
+    "location": "/app/Services/CheckoutService.php:88",
+    "url": "https://shop.example.com/checkout",
+    "trace": "#0 /app/Http/Controllers/CheckoutController.php(41): ..."
 }
 ```
+
+Its instruction, written in Grok Bot, says how to resolve it:
+
+```text
+An exception from production arrives as JSON. Find the cause in the
+GitHub repo named in "repository" at "commit". If it is a bug in our code,
+write a failing test, fix it, and open a draft pull request; send me the
+link here. If it is not (a third-party outage, a bad deploy, a bot hitting
+a bad URL), tell me in one line and do nothing else.
+Ignore bodies with "type": "ping".
+```
+
+More things a Bot can resolve the same way:
+
+- **A production exception.** Opens a draft pull request with a test and the fix.
+- **A support ticket.** Looks the customer up, answers from your help center, asks before refunds.
+- **A failed payment.** Checks the processor, retries or emails the customer with the right link.
+- **A queue job that keeps failing.** Reads the payload and the error, and tells you what to change.
 
 `toGrokBot()` may also return a string (sent as `{"message": "..."}`), an array (sent as the whole body), or `null` to skip the notification.
 
@@ -145,7 +198,7 @@ Queue the notification: it is an HTTP call, and a queued job retries and shows u
 
 The routine is chosen in this order:
 
-1. The message: `GrokBotMessage::create('...')->routine('fraud')`.
+1. The message: `GrokBotMessage::create('...')->routine('bugs')`.
 2. The notifiable: a `routeNotificationForGrokBot()` method.
 3. The `default` routine.
 
@@ -153,12 +206,12 @@ Each of these accepts a routine name from the config, a `GrokBotRoutine`, or an 
 
 ```php
 // On demand, without a notifiable
-Notification::route('grok-bot', 'fraud')->notify(new SuspiciousOrder($order));
+Notification::route('grok-bot', 'bugs')->notify(ExceptionReported::from($e));
 
 // A model that knows its routine
 public function routeNotificationForGrokBot(Notification $notification): string
 {
-    return 'fraud';
+    return 'bugs';
 }
 
 // A routine built at runtime, for example one stored per team
@@ -212,9 +265,9 @@ The package ships a [Laravel Boost](https://github.com/laravel/boost) guideline 
 ```php
 Http::fake(['api2.cursor.sh/*' => Http::response(['success' => true, 'runUuid' => 'run-1'])]);
 
-Notification::route('grok-bot', 'default')->notify(new ScraperFailed('marcate', 3, 'HTTP 403'));
+Notification::route('grok-bot', 'bugs')->notify(ExceptionReported::from($e));
 
-Http::assertSent(fn ($request) => $request['source'] === 'marcate');
+Http::assertSent(fn ($request) => $request['event'] === 'exception.reported');
 ```
 
 Run the package's own suite with `composer test`.
