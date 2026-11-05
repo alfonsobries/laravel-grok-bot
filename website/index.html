@@ -82,9 +82,9 @@
   .install {
     display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 6px 0 16px;
     border: 1px solid var(--line); border-radius: 8px; background: var(--code-bg);
-    font: 14px/1 "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace; max-width: 100%;
+    font: 14px/1 "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace; max-width: 100%; min-width: 0;
   }
-  .install code { overflow-x: auto; white-space: nowrap; }
+  .install code { min-width: 0; overflow-x: auto; white-space: nowrap; }
   .install code::before { content: "$ "; color: var(--muted); }
   section { padding: 48px 0; border-top: 1px solid var(--line); }
   h2 { font-size: 24px; letter-spacing: -0.02em; font-weight: 600; margin: 0 0 8px; }
