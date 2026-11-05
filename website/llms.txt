@@ -9,5 +9,7 @@
 
 ## Docs
 
+- [Packagist](https://packagist.org/packages/alfonsobries/laravel-grok-bot): versions and install stats
+
 - [README](https://github.com/alfonsobries/laravel-grok-bot/blob/main/README.md): installation, routing, message methods, errors, testing
 - [Boost skill](https://github.com/alfonsobries/laravel-grok-bot/blob/main/resources/boost/skills/grok-bot-notifications/SKILL.md): wiring a notification to a routine end to end
