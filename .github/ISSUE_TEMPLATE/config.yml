@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Feature idea or question
+    url: https://github.com/alfonsobries/laravel-grok-bot/discussions
+    about: Ask or propose in Discussions.
+  - name: Security vulnerability
+    url: https://github.com/alfonsobries/laravel-grok-bot/security/advisories/new
+    about: Report it privately.
