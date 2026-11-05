@@ -1,0 +1,58 @@
+{
+    "name": "alfonsobries/laravel-grok-bot",
+    "description": "Laravel notification channel for Grok Bot: send any notification to a Grok Bot routine through its webhook trigger.",
+    "keywords": ["laravel", "notifications", "notification-channel", "grok", "grok-bot", "cursor", "webhook", "ai-agent"],
+    "homepage": "https://github.com/alfonsobries/laravel-grok-bot",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alfonso Bribiesca",
+            "email": "alfonso@vexilo.com",
+            "homepage": "https://github.com/alfonsobries"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/console": "^11.0|^12.0|^13.0",
+        "illuminate/http": "^11.0|^12.0|^13.0",
+        "illuminate/notifications": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^9.0|^10.0|^11.0",
+        "pestphp/pest": "^3.0|^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "NotificationChannels\\GrokBot\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NotificationChannels\\GrokBot\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "format": "pint",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "test": "pest",
+        "test:coverage": "pest --coverage --min=100"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "NotificationChannels\\GrokBot\\GrokBotServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

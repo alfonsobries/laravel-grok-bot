@@ -1,0 +1,9 @@
+/vendor
+/website/node_modules
+/website/.vercel
+composer.lock
+.phpunit.cache
+.phpunit.result.cache
+coverage
+.DS_Store
+.env
